@@ -73,7 +73,12 @@ ask_password() {
 }
 
 ask_yesno() {
-  whiptail --title "$1" --yesno "$2" 12 72
+  local choice
+  choice=$(whiptail --title "$1" --menu "$2" 16 72 2 \
+    "YES" "是" \
+    "NO"  "否" \
+    3>&1 1>&2 2>&3)
+  [ "$choice" = "YES" ]
   return $?
 }
 
@@ -415,27 +420,30 @@ done
 # ----------------------------------------------------------
 # 智控台密钥配置
 # ----------------------------------------------------------
-whiptail --title "配置智控台密钥" --msgbox \
-"服务已启动！请完成密钥配置：
-
-1. 用浏览器访问智控台：
-   http://$SERVER_PUBLIC_IP:$WEB_PORT
-
-2. 注册第一个账号（即超级管理员）
-
-3. 登录后进入：
-   顶部菜单 → 参数字典 → 参数管理
-   找到参数编码：server.secret
-   复制该参数值
-
-4. 回到此处按 Ok，粘贴密钥完成配置
-
-提示：云服务器请先在安全组放行端口
-  $WS_PORT、$HTTP_PORT、$WEB_PORT" \
-22 62
-
-SECRET_KEY=$(ask_input "【密钥配置】" \
-  "请粘贴从智控台复制的 server.secret 密钥\n（留空则跳过，后续可手动配置）" "")
+# ----------------------------------------------------------
+# 智控台密钥配置（用普通终端输入，支持正常粘贴）
+# ----------------------------------------------------------
+clear
+echo -e "\033[32m================================================\033[0m"
+echo -e "\033[32m  配置智控台密钥\033[0m"
+echo -e "\033[32m================================================\033[0m"
+echo ""
+echo -e "  1. 用浏览器访问智控台："
+echo -e "     \033[0mhttp://${SERVER_PUBLIC_IP}:${WEB_PORT}\033[32m"
+echo ""
+echo -e "  2. 注册第一个账号（即超级管理员）"
+echo ""
+echo -e "  3. 登录后进入："
+echo -e "     顶部菜单 → 参数字典 → 参数管理"
+echo -e "     找到参数编码：\033[33mserver.secret\033[32m"
+echo -e "     复制该参数值"
+echo ""
+echo -e "  提示：云服务器请先在安全组放行端口 ${WS_PORT}、${HTTP_PORT}、${WEB_PORT}"
+echo ""
+echo -e "\033[32m================================================\033[0m"
+echo -e "\033[0m"
+echo -n "请粘贴 server.secret（留空跳过）: "
+read -r SECRET_KEY
 
 if [ -n "$SECRET_KEY" ]; then
   cat >> data/.config.yaml <<EOF
@@ -445,11 +453,9 @@ manager-api:
   secret: ${SECRET_KEY}
 EOF
   docker restart xiaozhi-esp32-server
-  whiptail --title "配置完成" --msgbox "密钥已写入，AI 服务器已重启。" 8 45
+  echo -e "\033[32m密钥已写入，AI 服务器已重启。\033[0m"
 else
-  whiptail --title "已跳过" \
-    --msgbox "已跳过密钥配置。\n后续可编辑 data/.config.yaml 手动添加：\n\nmanager-api:\n  url: http://xiaozhi-esp32-server-web:${WEB_PORT}/xiaozhi\n  secret: 你的密钥" \
-    14 58
+  echo -e "\033[33m已跳过密钥配置，后续可编辑 data/.config.yaml 手动添加。\033[0m"
 fi
 
 # ----------------------------------------------------------
