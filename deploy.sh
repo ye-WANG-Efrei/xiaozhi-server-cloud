@@ -73,12 +73,9 @@ ask_password() {
 }
 
 ask_yesno() {
-  local choice
-  choice=$(whiptail --title "$1" --menu "$2" 16 72 2 \
-    "YES" "是" \
-    "NO"  "否" \
-    3>&1 1>&2 2>&3)
-  [ "$choice" = "YES" ]
+  whiptail --title "$1" --yesno "$2" 14 72 \
+    --yes-button "YES  是" \
+    --no-button  "NO   否"
   return $?
 }
 
