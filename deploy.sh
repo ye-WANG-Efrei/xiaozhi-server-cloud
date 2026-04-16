@@ -20,7 +20,7 @@ window=green,black
 border=green,black
 title=green,black
 button=black,green
-actbutton=black,brightgreen
+actbutton=green,red
 entry=black,green
 label=green,black
 checkbox=green,black
@@ -73,7 +73,7 @@ ask_password() {
 }
 
 ask_yesno() {
-  whiptail --title "$1" --yesno "$2" 12 62
+  whiptail --title "$1" --yesno "$2" 12 72
   return $?
 }
 
