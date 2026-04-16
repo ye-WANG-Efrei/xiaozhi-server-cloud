@@ -157,6 +157,7 @@ fi
 # Docker 镜像加速配置
 # ----------------------------------------------------------
 MIRROR_CHOICE=$(whiptail --title "Docker 镜像加速" \
+  --nocancel \
   --menu "选择 Docker 镜像加速源（国内服务器强烈推荐）" 18 62 8 \
   "1" "轩辕镜像（推荐）" \
   "2" "腾讯云" \
@@ -166,7 +167,7 @@ MIRROR_CHOICE=$(whiptail --title "Docker 镜像加速" \
   "6" "阿里云" \
   "7" "自定义" \
   "8" "跳过" \
-  3>&1 1>&2 2>&3) || exit 1
+  3>&1 1>&2 2>&3)
 
 case $MIRROR_CHOICE in
   1) MIRROR_URL="https://docker.xuanyuan.me" ;;
@@ -300,6 +301,8 @@ fi
 # 确认信息
 # ----------------------------------------------------------
 whiptail --title "请确认配置信息" --yesno \
+  --yes-button "YES  是" \
+  --no-button  "NO   否" \
 "以下是你的配置，确认无误后开始部署：
 
   公网 IP    ：$SERVER_PUBLIC_IP
