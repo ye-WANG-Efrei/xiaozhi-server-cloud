@@ -73,10 +73,14 @@ ask_password() {
 }
 
 ask_yesno() {
-  whiptail --title "$1" --yesno "$2" 14 72 \
-    --yes-button "YES  是" \
-    --no-button  "NO   否"
-  return $?
+  local result
+  result=$(whiptail --title "$1" \
+    --nocancel \
+    --menu "$2" 20 72 2 \
+    "YES" "是" \
+    "NO"  "否" \
+    3>&1 1>&2 2>&3)
+  [ "$result" = "YES" ] && return 0 || return 1
 }
 
 # ----------------------------------------------------------
@@ -300,10 +304,9 @@ fi
 # ----------------------------------------------------------
 # 确认信息
 # ----------------------------------------------------------
-whiptail --title "请确认配置信息" --yesno \
-  --yes-button "YES  是" \
-  --no-button  "NO   否" \
-"以下是你的配置，确认无误后开始部署：
+CONFIRM_RESULT=$(whiptail --title "请确认配置信息" \
+  --nocancel \
+  --menu "以下是你的配置，确认无误后开始部署：
 
   公网 IP    ：$SERVER_PUBLIC_IP
   内网 IP    ：$SERVER_LAN_IP
@@ -316,9 +319,12 @@ whiptail --title "请确认配置信息" --yesno \
   时区       ：$TZ
   AI 服务器  ：$([ $INSTALL_AI_SERVER -eq 1 ] && echo "安装" || echo "跳过（可后续补装）")
 
-确认部署？" 24 62
+确认部署？" 26 72 2 \
+  "YES" "确认，开始部署" \
+  "NO"  "取消，重新来过" \
+  3>&1 1>&2 2>&3)
 
-if [ $? -ne 0 ]; then
+if [ "$CONFIRM_RESULT" != "YES" ]; then
   whiptail --title "已取消" --msgbox "部署已取消。" 8 40
   exit 0
 fi
