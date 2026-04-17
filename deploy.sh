@@ -162,26 +162,25 @@ fi
 # ----------------------------------------------------------
 MIRROR_CHOICE=$(whiptail --title "Docker 镜像加速" \
   --nocancel \
-  --menu "选择 Docker 镜像加速源（国内服务器强烈推荐）" 18 62 8 \
-  "1" "轩辕镜像（推荐）" \
-  "2" "腾讯云" \
-  "3" "中科大" \
-  "4" "网易 163" \
+  --menu "选择 Docker 镜像加速源（国内服务器强烈推荐）\n阿里云个人加速器最稳定，需在控制台获取专属地址" 20 68 8 \
+  "1" "阿里云个人加速器（推荐，需填写专属地址）" \
+  "2" "腾讯云（腾讯云 CVM 推荐）" \
+  "3" "轩辕镜像" \
+  "4" "中科大" \
   "5" "华为云" \
-  "6" "阿里云" \
-  "7" "自定义" \
-  "8" "跳过" \
+  "6" "自定义" \
+  "7" "跳过" \
   3>&1 1>&2 2>&3)
 
 case $MIRROR_CHOICE in
-  1) MIRROR_URL="https://docker.xuanyuan.me" ;;
+  1) MIRROR_URL=$(ask_input "阿里云个人加速器" \
+       "请输入你的专属加速地址\n\n获取方式：阿里云控制台 → 容器镜像服务 → 镜像工具 → 镜像加速器\n\n格式：https://xxxxxx.mirror.aliyuncs.com" "") ;;
   2) MIRROR_URL="https://mirror.ccs.tencentyun.com" ;;
-  3) MIRROR_URL="https://docker.mirrors.ustc.edu.cn" ;;
-  4) MIRROR_URL="https://hub-mirror.c.163.com" ;;
+  3) MIRROR_URL="https://docker.xuanyuan.me" ;;
+  4) MIRROR_URL="https://docker.mirrors.ustc.edu.cn" ;;
   5) MIRROR_URL="https://05f073ad3c0010ea0f4bc00b7105ec20.mirror.swr.myhuaweicloud.com" ;;
-  6) MIRROR_URL="https://registry.aliyuncs.com" ;;
-  7) MIRROR_URL=$(ask_input "自定义镜像源" "请输入完整的镜像源 URL" "") ;;
-  8) MIRROR_URL="" ;;
+  6) MIRROR_URL=$(ask_input "自定义镜像源" "请输入完整的镜像源 URL" "") ;;
+  7) MIRROR_URL="" ;;
 esac
 
 if [ -n "$MIRROR_URL" ]; then
