@@ -13,6 +13,10 @@ cd /opt/xiaozhi-server-cloud
 >[!tip]
 >如果没有权限`Permission denied`，就直接 clone 到你的 home 目录
 >```bash
+>git clone https://github.com/ye-WANG-Efrei/xiaozhi-server-cloud.git /home/
+>```
+>或者你`sudo`再给你的这个用户赋权
+>```bash
 >sudo git clone https://github.com/ye-WANG-Efrei/xiaozhi-server-cloud.git /opt/xiaozhi-server-cloud
 >sudo chown -R $USER:$USER /opt/xiaozhi-server-cloud
 >cd /opt/xiaozhi-server-cloud
