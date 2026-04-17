@@ -10,6 +10,13 @@
 git clone https://github.com/ye-WANG-Efrei/xiaozhi-server-cloud.git /opt/xiaozhi-server-cloud
 cd /opt/xiaozhi-server-cloud
 ```
+>[!tip]
+>如果没有权限`Permission denied`，就直接 clone 到你的 home 目录
+>```bash
+>sudo git clone https://github.com/ye-WANG-Efrei/xiaozhi-server-cloud.git /opt/xiaozhi-server-cloud
+>sudo chown -R $USER:$USER /opt/xiaozhi-server-cloud
+>cd /opt/xiaozhi-server-cloud
+>```
 
 ### 2. 运行一键部署脚本
 
@@ -61,6 +68,15 @@ docker logs -f xiaozhi-esp32-server-web
 ```bash
 docker compose -f docker-compose_deploy.yml down
 ```
+
+>[!warning]
+>如果你真的想清空数据重新开始：
+>```
+>docker compose -f docker-compose_deploy.yml down
+>rm -rf ./mysql/data
+>docker compose -f docker-compose_deploy.yml up -d
+>```
+>但要注意 rm -rf ./mysql/data 是不可逆的，所有账号和数据会全部消失。
 
 ### 升级
 
