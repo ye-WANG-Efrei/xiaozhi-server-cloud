@@ -84,7 +84,7 @@ services:
   # Redis 缓存
   # ----------------------------------------------------------
   xiaozhi-esp32-server-redis:
-    image: redis:8.0
+    image: redis:7.2
     container_name: xiaozhi-esp32-server-redis
     restart: always
     networks:
