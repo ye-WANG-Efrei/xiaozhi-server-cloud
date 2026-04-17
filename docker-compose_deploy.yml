@@ -3,7 +3,6 @@
 #   cp .env.example .env    # 首次使用，复制并填写参数
 #   docker compose -f docker-compose_deploy.yml up -d
 
-version: '3'
 
 services:
 
