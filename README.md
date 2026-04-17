@@ -36,6 +36,20 @@ sudo bash deploy.sh
 - 容器启动 + 智控台密钥配置
 
 ---
+>[!TIP]
+>阿里云镜像加速
+>```
+>sudo mkdir -p /etc/docker
+>sudo tee /etc/docker/daemon.json <<-'EOF'
+>{
+> "registry-mirrors": ["https:你的镜像加速器.com"]
+>}
+>EOF
+>
+>
+>sudo systemctl daemon-reload
+>sudo systemctl restart docker
+>```
 
 ## 服务端口
 
