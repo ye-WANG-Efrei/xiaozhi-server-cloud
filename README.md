@@ -86,11 +86,13 @@ docker logs -f xiaozhi-esp32-server-web
 ```bash
 docker compose -f docker-compose_deploy.yml down
 ```
->[tip]
+
+>[!tip]
 >docker 重启服务
 >```
 >docker restart xiaozhi-esp32-server
 >```
+>
 
 
 >[!warning]
