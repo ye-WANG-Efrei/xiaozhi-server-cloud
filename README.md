@@ -86,6 +86,12 @@ docker logs -f xiaozhi-esp32-server-web
 ```bash
 docker compose -f docker-compose_deploy.yml down
 ```
+>[tip]
+>docker 重启服务
+>```
+>docker restart xiaozhi-esp32-server
+>```
+
 
 >[!warning]
 >如果你真的想清空数据重新开始：
