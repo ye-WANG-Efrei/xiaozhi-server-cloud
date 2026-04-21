@@ -349,6 +349,9 @@ EOF
 mkdir -p data
 cat > data/.config.yaml <<EOF
 server:
+  ip: 0.0.0.0
+  port: ${WS_PORT}
+  http_port: ${HTTP_PORT}
   websocket: ws://${SERVER_PUBLIC_IP}:${WS_PORT}/xiaozhi/v1/
   vision_explain: http://${SERVER_PUBLIC_IP}:${HTTP_PORT}/mcp/vision/explain
 EOF
