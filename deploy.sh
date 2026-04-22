@@ -389,14 +389,12 @@ clear
 echo -e "\033[32m正在拉取镜像并启动服务，请稍候...\033[0m"
 echo ""
 
-if [ $INSTALL_AI_SERVER -eq 1 ]; then
-  docker compose -f docker-compose_deploy.yml up -d
-else
-  docker compose -f docker-compose_deploy.yml up -d \
-    xiaozhi-esp32-server-db \
-    xiaozhi-esp32-server-redis \
-    xiaozhi-esp32-server-web
-fi
+# 无论是否安装 AI 服务器，都先只启动智控台组件
+# AI 服务器在 secret 配置完成后再启动，避免无 manager-api 时回退 FunASR 导致 OOM
+docker compose -f docker-compose_deploy.yml up -d \
+  xiaozhi-esp32-server-db \
+  xiaozhi-esp32-server-redis \
+  xiaozhi-esp32-server-web
 
 if [ $? -ne 0 ]; then
   whiptail --title "启动失败" \
@@ -460,10 +458,19 @@ manager-api:
   url: http://xiaozhi-esp32-server-web:${WEB_PORT}/xiaozhi
   secret: ${SECRET_KEY}
 EOF
-  docker restart xiaozhi-esp32-server
-  echo -e "\033[32m密钥已写入，AI 服务器已重启。\033[0m"
+  if [ $INSTALL_AI_SERVER -eq 1 ]; then
+    echo -e "\033[32m密钥已写入，正在启动 AI 服务器...\033[0m"
+    docker compose -f docker-compose_deploy.yml up -d xiaozhi-esp32-server
+    echo -e "\033[32mAI 服务器已启动。\033[0m"
+  else
+    echo -e "\033[32m密钥已写入。\033[0m"
+  fi
 else
-  echo -e "\033[33m已跳过密钥配置，后续可编辑 data/.config.yaml 手动添加。\033[0m"
+  echo -e "\033[33m已跳过密钥配置。\033[0m"
+  if [ $INSTALL_AI_SERVER -eq 1 ]; then
+    echo -e "\033[33mAI 服务器未启动，请配置好 data/.config.yaml 后手动执行：\033[0m"
+    echo -e "\033[33m  docker compose -f docker-compose_deploy.yml up -d xiaozhi-esp32-server\033[0m"
+  fi
 fi
 
 # ----------------------------------------------------------
