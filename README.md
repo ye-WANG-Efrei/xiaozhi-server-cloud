@@ -138,3 +138,16 @@ docker compose -f docker-compose_deploy.yml up -d xiaozhi-esp32-server
 | 仅智控台测试 | 1 核 2GB |
 | 完整 AI 服务 | 4 核 4GB |
 | 推荐生产环境 | 4 核 8GB |
+
+>[!tip]
+>OOM可以用磁盘做SWAP
+>在服务器上依次运行这几条命令
+>```bash
+>fallocate -l 4G /swapfile
+>chmod 600 /swapfile
+>mkswap /swapfile
+>swapon /swapfile
+>echo '/swapfile none swap sw 0 0' >> /etc/fstab
+>free -h
+>```
+>    
