@@ -202,37 +202,45 @@ fi
 if docker inspect xiaozhi-esp32-server &>/dev/null || \
    docker inspect xiaozhi-esp32-server-web &>/dev/null; then
 
-  if ask_yesno "检测到已有安装" \
-    "检测到小智服务端已部署。\n\n选「是」执行升级：\n  停止旧容器 → 删除旧镜像 → 保留数据 → 重新拉起\n\n选「否」取消，不做任何改动。"; then
+  UPGRADE_CHOICE=$(whiptail --title "检测到已有安装" \
+    --nocancel \
+    --menu "检测到小智服务端已部署，请选择操作：" 18 72 3 \
+    "UPGRADE"   "升级：删除旧镜像 → 拉取最新镜像 → 重新部署" \
+    "REDEPLOY"  "重新部署：保留本地镜像，跳过拉取（镜像源不可用时用）" \
+    "CANCEL"    "取消，保持现状退出" \
+    3>&1 1>&2 2>&3)
 
-    echo "正在停止并移除旧容器..."
-    docker compose -f docker-compose_deploy.yml down 2>/dev/null || true
+  if [ "$UPGRADE_CHOICE" = "CANCEL" ]; then
+    whiptail --title "已取消" --msgbox "操作已取消，当前部署保持不变。" 8 45
+    exit 0
+  fi
 
-    for c in xiaozhi-esp32-server xiaozhi-esp32-server-web \
-              xiaozhi-esp32-server-db xiaozhi-esp32-server-redis; do
-      docker rm -f "$c" 2>/dev/null && echo "已移除容器: $c" || true
-    done
+  echo "正在停止并移除旧容器..."
+  docker compose -f docker-compose_deploy.yml down 2>/dev/null || true
 
+  for c in xiaozhi-esp32-server xiaozhi-esp32-server-web \
+            xiaozhi-esp32-server-db xiaozhi-esp32-server-redis; do
+    docker rm -f "$c" 2>/dev/null && echo "已移除容器: $c" || true
+  done
+
+  if [ "$UPGRADE_CHOICE" = "UPGRADE" ]; then
     for img in \
       "ghcr.nju.edu.cn/xinnan-tech/xiaozhi-esp32-server:server_latest" \
       "ghcr.nju.edu.cn/xinnan-tech/xiaozhi-esp32-server:web_latest"; do
       docker rmi "$img" 2>/dev/null && echo "已删除镜像: $img" || true
     done
-
-    # 备份现有配置
-    if [ -f data/.config.yaml ]; then
-      mkdir -p data/backup
-      BACKUP="data/backup/.config.yaml.$(date +%Y%m%d%H%M%S)"
-      cp data/.config.yaml "$BACKUP"
-      echo "已备份配置到 $BACKUP"
-    fi
-
-    whiptail --title "升级准备完成" \
-      --msgbox "旧容器已清理，数据库和上传文件已保留。\n\n接下来重新确认部署参数。" 12 55
-  else
-    whiptail --title "已取消" --msgbox "升级已取消，当前部署保持不变。" 8 45
-    exit 0
   fi
+
+  # 备份现有配置
+  if [ -f data/.config.yaml ]; then
+    mkdir -p data/backup
+    BACKUP="data/backup/.config.yaml.$(date +%Y%m%d%H%M%S)"
+    cp data/.config.yaml "$BACKUP"
+    echo "已备份配置到 $BACKUP"
+  fi
+
+  whiptail --title "准备完成" \
+    --msgbox "旧容器已清理，数据库和上传文件已保留。\n\n接下来重新确认部署参数。" 12 55
 fi
 
 # ----------------------------------------------------------
