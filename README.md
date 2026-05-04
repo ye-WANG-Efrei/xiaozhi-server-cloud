@@ -138,6 +138,10 @@ LLM:
     url: https://open.bigmodel.cn/api/paas/v4/
     api_key:“你自己的API”
 ```
+配置后重启server服务
+```bash
+ docker compose -f docker-compose_deploy.yml restart xiaozhi-esp32-server
+```
 
 ---
 
