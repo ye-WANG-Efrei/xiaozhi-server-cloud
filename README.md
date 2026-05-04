@@ -116,14 +116,27 @@ docker compose -f docker-compose_deploy.yml up -d xiaozhi-esp32-server
 ### 单独 LLM key 配配置
 >本地 FunASR 需要 2GB 内存，如果服务器不够，可以改用云端 API。
 
-更改你的配置`data/.config.yaml`
+更改你的配置`data/.config.yaml` 我这里用的是阿里云的智能语音交互和质谱的LLM
 ```bash
+selected_module:
+  ASR: AliyunASR
+  LLM: ChatGLMLLM
+
+ASR:
+  AliyunASR:
+    type: aliyun
+    appkey: "你自己的APPKey"
+    token: ""
+    access_key_id: "你自己的KeyId"
+    access_key_secret: "你自己的KeySecret"
+    output_dir: tmp/
+
 LLM:
-    ChatGLMLLM:
-      type: openai
-      model_name: glm-4-flash
-      url: https://open.bigmodel.cn/api/paas/v4/
-      api_key: 你的真实key
+  ChatGLMLLM:
+    type: openai
+    model_name: glm-4-flash
+    url: https://open.bigmodel.cn/api/paas/v4/
+    api_key:“你自己的API”
 ```
 
 ---
