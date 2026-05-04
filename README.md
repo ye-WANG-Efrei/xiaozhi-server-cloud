@@ -113,6 +113,18 @@ docker compose -f docker-compose_deploy.yml down
 ```bash
 docker compose -f docker-compose_deploy.yml up -d xiaozhi-esp32-server
 ```
+### 单独 LLM key 配配置
+>本地 FunASR 需要 2GB 内存，如果服务器不够，可以改用云端 API。
+
+更改你的配置`data/.config.yaml`
+```bash
+LLM:
+    ChatGLMLLM:
+      type: openai
+      model_name: glm-4-flash
+      url: https://open.bigmodel.cn/api/paas/v4/
+      api_key: 你的真实key
+```
 
 ---
 
