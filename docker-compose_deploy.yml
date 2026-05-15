@@ -73,7 +73,7 @@ services:
     expose:
       - 3306
     volumes:
-      - ./mysql/data:/var/lib/mysql
+      - mysql_data:/var/lib/mysql
     environment:
       - TZ=${TZ:-Asia/Shanghai}
       - MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PASSWORD}
@@ -107,3 +107,6 @@ services:
 
 networks:
   default:
+
+volumes:
+  mysql_data:

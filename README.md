@@ -63,6 +63,34 @@ sudo bash deploy.sh
 
 ---
 
+## 配置阿里云语音识别（推荐，2GB 服务器必须）
+
+默认 ASR 为本地 FunASR，会占用 ~1.5GB 内存，2GB 服务器必然 OOM。切换为阿里云流式 ASR 后，AI 服务器内存占用降至 ~200MB。
+
+**配置步骤：**
+
+1. 登录智控台（`http://<服务器IP>:8002`）
+2. 顶部菜单 → **模型配置**
+3. 找到 ASR 模块，类型选择 **阿里云流式（AliyunStreamASR）**
+4. 填入以下参数：
+
+| 参数 | 获取方式 |
+|------|---------|
+| `appkey` | 阿里云控制台 → 智能语音交互 → 项目管理 |
+| `access_key_id` | 阿里云控制台 → 右上角头像 → AccessKey 管理 |
+| `access_key_secret` | 同上 |
+
+5. 保存后重启 AI 服务器：
+
+```bash
+docker restart xiaozhi-esp32-server
+```
+
+>[!warning]
+>2GB 内存服务器部署时，务必在智控台完成此配置后再启动 AI 服务器。`deploy.sh` 已保证 AI 服务器在 secret 配置完成后才启动，但 ASR 仍需手动切换为阿里云。
+
+---
+
 ## 手动管理
 
 ### 查看运行状态
