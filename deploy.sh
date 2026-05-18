@@ -309,6 +309,35 @@ if ask_yesno "【AI 服务器】" \
 fi
 
 # ----------------------------------------------------------
+# 阿里云 ASR 配置（2GB 服务器必须，避免 FunASR OOM）
+# ----------------------------------------------------------
+ALIYUN_APPKEY=""
+ALIYUN_KEY_ID=""
+ALIYUN_KEY_SECRET=""
+
+if [ $INSTALL_AI_SERVER -eq 1 ]; then
+  if ask_yesno "【阿里云 ASR 配置】" \
+    "是否配置阿里云流式语音识别？\n\n2GB 内存服务器强烈推荐：\n  默认 FunASR 需要 ~1.5GB 内存，容易 OOM\n  阿里云流式 ASR 内存仅 ~200MB\n\n选「是」现在配置（需要阿里云 AppKey 和 AccessKey）\n选「否」跳过（2GB 服务器可能 OOM）"; then
+
+    while [ -z "$ALIYUN_APPKEY" ]; do
+      ALIYUN_APPKEY=$(ask_input "【阿里云 ASR 1/3】" \
+        "请输入阿里云智能语音 AppKey\n（阿里云控制台 → 智能语音交互 → 项目管理）" "")
+      [ -z "$ALIYUN_APPKEY" ] && \
+        whiptail --title "输入错误" --msgbox "AppKey 不能为空，请重新输入。" 8 40
+    done
+
+    while [ -z "$ALIYUN_KEY_ID" ]; do
+      ALIYUN_KEY_ID=$(ask_input "【阿里云 ASR 2/3】" \
+        "请输入 AccessKey ID\n（阿里云控制台 → 右上角头像 → AccessKey 管理）" "")
+      [ -z "$ALIYUN_KEY_ID" ] && \
+        whiptail --title "输入错误" --msgbox "AccessKey ID 不能为空，请重新输入。" 8 40
+    done
+
+    ALIYUN_KEY_SECRET=$(ask_password "【阿里云 ASR 3/3】" "请输入 AccessKey Secret")
+  fi
+fi
+
+# ----------------------------------------------------------
 # 确认信息
 # ----------------------------------------------------------
 CONFIRM_RESULT=$(whiptail --title "请确认配置信息" \
@@ -325,8 +354,9 @@ CONFIRM_RESULT=$(whiptail --title "请确认配置信息" \
   Redis 密码 ：$([ -z "$REDIS_PASSWORD" ] && echo "（不设密码）" || echo "$REDIS_PASSWORD" | sed 's/./*/g')
   时区       ：$TZ
   AI 服务器  ：$([ $INSTALL_AI_SERVER -eq 1 ] && echo "安装" || echo "跳过（可后续补装）")
+  阿里云 ASR ：$([ -n "$ALIYUN_APPKEY" ] && echo "已配置" || echo "跳过")
 
-确认部署？" 26 72 2 \
+确认部署？" 28 72 2 \
   "YES" "确认，开始部署" \
   "NO"  "取消，重新来过" \
   3>&1 1>&2 2>&3)
@@ -432,8 +462,23 @@ while true; do
 done
 
 # ----------------------------------------------------------
-# 智控台密钥配置
+# 写入阿里云 ASR 配置到数据库（在 AI 服务器启动前完成）
 # ----------------------------------------------------------
+if [ -n "$ALIYUN_APPKEY" ] && [ -n "$ALIYUN_KEY_ID" ] && [ -n "$ALIYUN_KEY_SECRET" ]; then
+  echo -e "\033[32m正在将阿里云 ASR 写入数据库...\033[0m"
+  CONFIG_JSON="{\"type\":\"aliyun_stream\",\"appkey\":\"${ALIYUN_APPKEY}\",\"access_key_id\":\"${ALIYUN_KEY_ID}\",\"access_key_secret\":\"${ALIYUN_KEY_SECRET}\",\"host\":\"nls-gateway-cn-shanghai.aliyuncs.com\",\"max_sentence_silence\":800,\"output_dir\":\"tmp/\"}"
+
+  docker exec -e MYSQL_PWD="${MYSQL_ROOT_PASSWORD}" xiaozhi-esp32-server-db \
+    mysql -u root "${MYSQL_DATABASE}" -e "
+      INSERT INTO ai_model_config (id, model_type, provide_code, model_name, is_default, is_enabled, config_json, sort)
+      VALUES ('ASR_AliyunStreamASR', 'ASR', 'aliyun_stream', '阿里云流式语音识别', 1, 1, '${CONFIG_JSON}', 1)
+      ON DUPLICATE KEY UPDATE config_json='${CONFIG_JSON}', is_default=1, is_enabled=1;
+      UPDATE ai_model_config SET is_default=0 WHERE id='ASR_FunASR';
+      UPDATE ai_agent_template SET asr_model_id='ASR_AliyunStreamASR';
+    " && echo -e "\033[32m阿里云 ASR 配置写入成功。\033[0m" || \
+      echo -e "\033[33m警告：ASR 写入失败，请部署完成后在智控台手动配置。\033[0m"
+fi
+
 # ----------------------------------------------------------
 # 智控台密钥配置（用普通终端输入，支持正常粘贴）
 # ----------------------------------------------------------
